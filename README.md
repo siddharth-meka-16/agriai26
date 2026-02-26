@@ -6,7 +6,7 @@ A Full Stack Agricultural Insurance Claim Management System built for hackathon 
 
 ## 🌐 Live Demo
 
-🔗 https://agriaihackathon26.netlify.app
+🔗agriaihf26.netlify.app
 
 ---
 
