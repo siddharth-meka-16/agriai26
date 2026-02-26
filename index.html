@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriGuard AI Smart - Agricultural Insurance Platform</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+
+<body>
+
+<header class="nav-header">
+<div class="container nav-content">
+<a href="index.html" class="nav-logo">
+<div class="nav-logo-icon">🌾</div>
+<span>AgriGuard AI Smart</span>
+</a>
+<nav class="nav-links">
+<a href="#features" class="nav-link" data-i18n="nav.features">Features</a>
+<a href="#how-it-works" class="nav-link" data-i18n="nav.howItWorks">How It Works</a>
+<a href="#about" class="nav-link" data-i18n="nav.about">About</a>
+
+<div class="lang-dropdown">
+<a href="#" id="lang-toggle" class="nav-link lang-link">
+🌐 <span id="lang-current">English</span>
+</a>
+<div id="lang-dropdown" class="lang-dropdown-menu">
+<a href="#" data-lang="en" data-i18n="lang.en">English</a>
+<a href="#" data-lang="hi" data-i18n="lang.hi">हिन्दी</a>
+<a href="#" data-lang="te" data-i18n="lang.te">తెలుగు</a>
+</div>
+</div>
+</nav>
+</div>
+</header>
+
+<main class="main-content">
+<section class="hero-section">
+<div class="container">
+
+<h1 class="hero-title animate-fade-in" data-i18n="hero.title">
+AI-Powered Agricultural Insurance
+</h1>
+
+<p class="hero-subtitle animate-fade-in" data-i18n="hero.subtitle">
+Smart claim validation, advanced compensation modeling, and instant payouts for farmers.
+Trusted by thousands across the country.
+</p>
+
+<div class="role-cards">
+
+<div class="card role-card animate-fade-in" onclick="selectRole('farmer')" style="animation-delay:0.1s">
+<div class="role-icon">👨‍🌾</div>
+<h3 class="role-title" data-i18n="role.farmer.title">Farmer</h3>
+<p class="role-desc" data-i18n="role.farmer.desc">
+Submit claims, track status, and receive payouts directly to your bank account
+</p>
+</div>
+
+<div class="card role-card animate-fade-in" onclick="selectRole('officer')" style="animation-delay:0.2s">
+<div class="role-icon">👨‍💼</div>
+<h3 class="role-title" data-i18n="role.officer.title">Insurance Officer</h3>
+<p class="role-desc" data-i18n="role.officer.desc">
+Review claims, manage verifications, and track payouts in your region
+</p>
+</div>
+
+<div class="card role-card animate-fade-in" onclick="selectRole('government')" style="animation-delay:0.3s">
+<div class="role-icon">🏛️</div>
+<h3 class="role-title" data-i18n="role.government.title">Government</h3>
+<p class="role-desc" data-i18n="role.government.desc">
+View analytics, monitor fraud trends, and track national agricultural stats
+</p>
+</div>
+
+</div>
+</div>
+</section>
+</main>
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;">
+<div style="background:#111;padding:30px;border-radius:12px;width:350px;max-width:90%;box-shadow:0 0 20px rgba(0,255,150,0.3);">
+<h3 id="auth-role-title" style="margin-bottom:15px;text-align:center;color:white;"></h3>
+
+<input id="auth-username" type="text" placeholder="Username" style="width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #333;">
+<input id="auth-password" type="password" placeholder="Password" style="width:100%;padding:10px;margin-bottom:15px;border-radius:6px;border:1px solid #333;">
+
+<button onclick="loginUser()" style="width:100%;padding:10px;margin-bottom:8px;background:#00c896;border:none;color:#000;font-weight:bold;border-radius:6px;">Login</button>
+<button onclick="registerUser()" style="width:100%;padding:10px;background:#1f2937;border:none;color:#fff;border-radius:6px;">Register</button>
+<button onclick="closeAuth()" style="margin-top:10px;width:100%;background:none;color:#aaa;border:none;">Cancel</button>
+</div>
+</div>
+
+<footer style="padding:40px 24px;text-align:center;border-top:1px solid var(--glass-border);">
+<p class="text-muted" data-i18n="footer.copyright">© 2026 AgriGuard AI Smart. All rights reserved.</p>
+<p class="text-muted text-sm mt-sm" data-i18n="footer.tagline">Empowering Farmers with AI Technology</p>
+</footer>
+
+<script src="js/core.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/finance.js"></script>
+<script src="js/chatbot.js"></script>
+<script src="js/i18n.js"></script>
+
+<script>
+// ================= AUTH SYSTEM =================
+
+let selectedRole = null;
+
+function selectRole(role) {
+selectedRole = role;
+document.getElementById("auth-role-title").innerText =
+"Login as " + role.charAt(0).toUpperCase() + role.slice(1);
+document.getElementById("auth-modal").classList.remove("hidden");
+}
+
+function closeAuth() {
+document.getElementById("auth-modal").classList.add("hidden");
+}
+
+function registerUser() {
+const username = document.getElementById("auth-username").value.trim();
+const password = document.getElementById("auth-password").value.trim();
+
+if (!username || !password) {
+alert("All fields required");
+return;
+}
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+const exists = users.find(u => u.username === username && u.role === selectedRole);
+
+if (exists) {
+alert("User already exists for this role.");
+return;
+}
+
+users.push({ username, password, role: selectedRole });
+localStorage.setItem("users", JSON.stringify(users));
+alert("Registered successfully! You can now login.");
+}
+
+function loginUser() {
+const username = document.getElementById("auth-username").value.trim();
+const password = document.getElementById("auth-password").value.trim();
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+const validUser = users.find(
+u => u.username === username &&
+u.password === password &&
+u.role === selectedRole
+);
+
+if (!validUser) {
+alert("Invalid credentials.");
+return;
+}
+
+localStorage.setItem("currentUser", JSON.stringify(validUser));
+
+if (selectedRole === "farmer") {
+window.location.href = "farmer.html";
+} else if (selectedRole === "officer") {
+window.location.href = "officer.html";
+} else if (selectedRole === "government") {
+window.location.href = "government.html";
+}
+}
+
+(function initDemoUsers(){
+if (!localStorage.getItem("users")) {
+const demoUsers = [
+{ username: "farmer1", password: "1234", role: "farmer" },
+{ username: "officer1", password: "1234", role: "officer" },
+{ username: "gov1", password: "1234", role: "government" }
+];
+localStorage.setItem("users", JSON.stringify(demoUsers));
+}
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+initLanguage();
+
+if (typeof Chatbot !== "undefined") {
+Chatbot.init();
+}
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - AgriGuard AI Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+    <header class="nav-header">
+        <div class="container nav-content">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">🌾</div>
+                <span>AgriGuard AI Smart</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#" class="nav-link active" data-tab="new-claim" data-i18n="nav.newClaim">New Claim</a>
+                <a href="#" class="nav-link" data-tab="my-claims" data-i18n="nav.myClaims">My Claims</a>
+                <a href="index.html" class="nav-link" data-i18n="nav.logout">Logout</a>
+                
+                <div class="lang-dropdown">
+                    <a href="#" id="lang-toggle" class="nav-link lang-link">
+                        🌐 <span id="lang-current">English</span>
+                    </a>
+                    <div id="lang-dropdown" class="lang-dropdown-menu">
+                        <a href="#" data-lang="en" data-i18n="lang.en">English</a>
+                        <a href="#" data-lang="hi" data-i18n="lang.hi">हिन्दी</a>
+                        <a href="#" data-lang="te" data-i18n="lang.te">తెలుగు</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="dashboard-title" data-i18n="dashboard.farmer.title">Farmer Dashboard</h1>
+                    <p class="text-muted" data-i18n="dashboard.farmer.subtitle">Welcome! Submit and track your insurance claims</p>
+                </div>
+                <button class="btn btn-primary" onclick="showNewClaimForm()">
+                    <span>+</span> <span data-i18n="btn.newClaim">New Claim</span>
+                </button>
+            </div>
+
+            <div class="dashboard-layout">
+                <aside class="dashboard-sidebar">
+                    <nav class="dashboard-nav-vertical">
+                        <a href="#" class="dashboard-nav-item active" data-tab="new-claim">
+                            <span class="nav-icon">📝</span>
+                            <span class="nav-text" data-i18n="tab.submitClaim">Submit Claim</span>
+                        </a>
+                        <a href="#" class="dashboard-nav-item" data-tab="my-claims">
+                            <span class="nav-icon">📋</span>
+                            <span class="nav-text" data-i18n="tab.myClaims">My Claims</span>
+                        </a>
+                        <a href="#" class="dashboard-nav-item" data-tab="claim-details">
+                            <span class="nav-icon">📄</span>
+                            <span class="nav-text" data-i18n="tab.claimDetails">Claim Details</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <div class="dashboard-content">
+
+            <div id="new-claim" class="tab-content active">
+                <div class="card">
+                    <form id="claim-form" class="claim-form">
+                        <div class="form-section">
+                            <h3 class="form-section-title">📷 Crop Damage Images</h3>
+                            <div class="file-upload" id="file-upload-area">
+                                <div class="file-upload-icon">📁</div>
+                                <p class="text-lg font-semibold mb-sm" data-i18n="form.dropImages">Drop images here or click to upload</p>
+                                <p class="text-muted text-sm" data-i18n="form.uploadHint">Upload clear photos of crop damage (JPG, PNG)</p>
+                                <input type="file" id="image-upload" accept="image/*" multiple hidden>
+                            </div>
+                            <div class="file-preview" id="file-preview"></div>
+                            <div class="form-error" id="images-error"></div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">🌾 Crop Information</h3>
+                            <div class="grid grid-2 gap-lg">
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.cropType">Crop Type</label>
+                                    <select id="crop-type">
+                                        <option value="">Select crop type</option>
+                                        <option value="wheat">Wheat</option>
+                                        <option value="rice">Rice</option>
+                                        <option value="cotton">Cotton</option>
+                                        <option value="corn">Corn</option>
+                                        <option value="soybean">Soybean</option>
+                                        <option value="sugarcane">Sugarcane</option>
+                                    </select>
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.landSize">Land Size (acres)</label>
+                                    <input type="number" id="land-size" min="0.1" max="100" step="0.1" placeholder="e.g., 5.5">
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-2 gap-lg">
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.coverage">Policy Coverage (%)</label>
+                                    <select id="coverage-percent">
+                                        <option value="">Select coverage</option>
+                                        <option value="30">30%</option>
+                                        <option value="40">40%</option>
+                                        <option value="50">50%</option>
+                                        <option value="60">60%</option>
+                                        <option value="70" selected>70%</option>
+                                        <option value="80">80%</option>
+                                        <option value="90">90%</option>
+                                        <option value="100">100%</option>
+                                    </select>
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.damageDate">Date of Damage</label>
+                                    <input type="date" id="damage-date">
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">📍 Location</h3>
+                            
+                            <div class="location-mode-toggle">
+                                <label class="location-mode-option">
+                                    <input type="radio" name="location-mode" value="auto" checked onchange="toggleLocationMode()">
+                                    <span class="location-mode-label">📡 Auto Detect</span>
+                                </label>
+                                <label class="location-mode-option">
+                                    <input type="radio" name="location-mode" value="manual" onchange="toggleLocationMode()">
+                                    <span class="location-mode-label">✏️ Enter Manually</span>
+                                </label>
+                            </div>
+
+                            <div id="location-auto-section">
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.farmLocation">Farm Location</label>
+                                    <div class="flex gap-md mb-sm">
+                                        <button type="button" class="btn btn-outline btn-sm" onclick="detectLocation()">
+                                            📍 <span data-i18n="form.detectLocation">Detect My Location</span>
+                                        </button>
+                                        <span id="location-status" class="text-muted text-sm"></span>
+                                    </div>
+                                    <input type="hidden" id="latitude">
+                                    <input type="hidden" id="longitude">
+                                    <select id="region">
+                                        <option value="">Select district/region</option>
+                                        <option value="North District">North District</option>
+                                        <option value="South District">South District</option>
+                                        <option value="East District">East District</option>
+                                        <option value="West District">West District</option>
+                                        <option value="Central District">Central District</option>
+                                        <option value="Coastal Region">Coastal Region</option>
+                                        <option value="Hill Region">Hill Region</option>
+                                        <option value="Plain Region">Plain Region</option>
+                                    </select>
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="map-container" id="map-container">
+                                    <iframe id="location-map" 
+                                        src="https://www.openstreetmap.org/export/embed.html?bbox=77.0%2C28.4%2C77.4%2C28.6&amp;layer=mapnik&amp;marker=28.5%2C77.2" 
+                                        style="width:100%;height:100%;border:0;">
+                                    </iframe>
+                                </div>
+                            </div>
+
+                            <div id="location-manual-section" class="hidden">
+                                <div class="manual-location-card">
+                                    <div class="form-group">
+                                        <label class="form-label">State *</label>
+                                        <select id="manual-state">
+                                            <option value="">Select State</option>
+                                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                            <option value="Assam">Assam</option>
+                                            <option value="Bihar">Bihar</option>
+                                            <option value="Chhattisgarh">Chhattisgarh</option>
+                                            <option value="Goa">Goa</option>
+                                            <option value="Gujarat">Gujarat</option>
+                                            <option value="Haryana">Haryana</option>
+                                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                            <option value="Jharkhand">Jharkhand</option>
+                                            <option value="Karnataka">Karnataka</option>
+                                            <option value="Kerala">Kerala</option>
+                                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                            <option value="Maharashtra">Maharashtra</option>
+                                            <option value="Manipur">Manipur</option>
+                                            <option value="Meghalaya">Meghalaya</option>
+                                            <option value="Mizoram">Mizoram</option>
+                                            <option value="Nagaland">Nagaland</option>
+                                            <option value="Odisha">Odisha</option>
+                                            <option value="Punjab">Punjab</option>
+                                            <option value="Rajasthan">Rajasthan</option>
+                                            <option value="Sikkim">Sikkim</option>
+                                            <option value="Tamil Nadu">Tamil Nadu</option>
+                                            <option value="Telangana">Telangana</option>
+                                            <option value="Tripura">Tripura</option>
+                                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                            <option value="Uttarakhand">Uttarakhand</option>
+                                            <option value="West Bengal">West Bengal</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">City/District *</label>
+                                        <input type="text" id="manual-city" placeholder="Enter city or district">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Village/Area (Optional)</label>
+                                        <input type="text" id="manual-village" placeholder="Enter village or area">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                <input type="hidden" id="latitude">
+                                <input type="hidden" id="longitude">
+                                <select id="region">
+                                    <option value="">Select district/region</option>
+                                    <option value="North District">North District</option>
+                                    <option value="South District">South District</option>
+                                    <option value="East District">East District</option>
+                                    <option value="West District">West District</option>
+                                    <option value="Central District">Central District</option>
+                                    <option value="Coastal Region">Coastal Region</option>
+                                    <option value="Hill Region">Hill Region</option>
+                                    <option value="Plain Region">Plain Region</option>
+                                </select>
+                                <div class="form-error"></div>
+                            </div>
+                            <div class="map-container" id="map-container">
+                                <iframe id="location-map" 
+                                    src="https://www.openstreetmap.org/export/embed.html?bbox=77.0%2C28.4%2C77.4%2C28.6&amp;layer=mapnik&amp;marker=28.5%2C77.2" 
+                                    style="width:100%;height:100%;border:0;">
+                                </iframe>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">📝 Damage Description</h3>
+                            <div class="form-group">
+                                <textarea id="description" rows="4" placeholder="Describe the damage in detail..." data-i18n-placeholder="form.description"></textarea>
+                                <div class="form-error"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">👤 Farmer Information</h3>
+                            <div class="grid grid-2 gap-lg">
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.farmerName">Full Name</label>
+                                    <input type="text" id="farmer-name" placeholder="As per records">
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" data-i18n="form.farmerId">Farmer ID</label>
+                                    <input type="text" id="farmer-id" placeholder="e.g., F001">
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-md mt-lg">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                🚀 <span data-i18n="form.submitForAi">Submit for AI Analysis</span>
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="resetForm()" data-i18n="btn.clearForm">
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="my-claims" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" data-i18n="nav.myClaims">My Claims</h3>
+                        <div class="flex gap-md">
+                            <select id="claim-filter" class="btn btn-outline btn-sm">
+                                <option value="all">All Claims</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container-enhanced">
+                        <div class="table-scroll-wrapper">
+                            <table id="claims-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="table.claimId">Claim ID</th>
+                                        <th data-i18n="table.date">Date</th>
+                                        <th data-i18n="table.crop">Crop</th>
+                                        <th data-i18n="table.land">Land</th>
+                                        <th data-i18n="table.damage">Damage %</th>
+                                        <th data-i18n="table.status">Status</th>
+                                        <th data-i18n="table.payout">Payout</th>
+                                        <th data-i18n="table.actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="claims-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="no-claims" class="empty-state hidden">
+                        <div class="empty-state-icon">📋</div>
+                        <h3 class="empty-state-title" data-i18n="empty.noClaims">No claims found</h3>
+                        <p data-i18n="empty.noClaimsDesc">You haven't submitted any claims yet.</p>
+                        <button class="btn btn-primary mt-md" onclick="showNewClaimForm()" data-i18n="empty.submitFirst">Submit Your First Claim</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div id="claim-details" class="tab-content">
+                <div id="claim-details-content">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="chatbot-toggle" class="chatbot-toggle" title="Chat with AgriGuard Assistant">💬</div>
+    <div id="chatbot-panel" class="chatbot-panel hidden">
+        <div class="chatbot-header">
+            <span class="chatbot-title">🌾 AgriGuard Assistant</span>
+            <div class="chatbot-header-actions">
+                <button id="chatbot-speak" class="chatbot-header-btn" title="Toggle auto-speak">🔊</button>
+                <button id="chatbot-close" class="chatbot-close">✕</button>
+            </div>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages"></div>
+        <div class="chatbot-input">
+            <button id="chatbot-mic" class="chatbot-mic-btn" title="Voice input">🎤</button>
+            <input type="text" id="chatbot-input-field" placeholder="Type your message..." aria-label="Chat input">
+            <button id="chatbot-send" class="btn btn-accent btn-sm">Send</button>
+        </div>
+    </div>
+
+    <script src="js/core.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/finance.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/i18n.js"></script>
+    <script>
+        // ===== ROLE PROTECTION =====
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        if (!currentUser || currentUser.role !== "farmer") {
+            window.location.href = "index.html";
+        }
+        
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "index.html";
+        }
+
+        let uploadedImages = [];
+        let currentClaimId = null;
+        let aiResultData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initLanguage();
+            initTabs();
+            initFileUpload();
+            initFormSubmission();
+            loadMyClaims();
+            setDefaultDate();
+            if (typeof Chatbot !== "undefined") {
+                Chatbot.init();
+            }
+        });
+
+        function initTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const navLinks = document.querySelectorAll('.nav-link[data-tab]');
+            const dashboardNavItems = document.querySelectorAll('.dashboard-nav-item');
+
+            function switchTab(tabId) {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.nav-link[data-tab]').forEach(link => link.classList.remove('active'));
+                document.querySelectorAll('.dashboard-nav-item').forEach(item => item.classList.remove('active'));
+                
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) targetTab.classList.add('active');
+                
+                document.querySelector(`.tab-btn[data-tab="${tabId}"]`)?.classList.add('active');
+                document.querySelector(`.nav-link[data-tab="${tabId}"]`)?.classList.add('active');
+                document.querySelector(`.dashboard-nav-item[data-tab="${tabId}"]`)?.classList.add('active');
+            }
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(link.dataset.tab);
+                });
+            });
+
+            dashboardNavItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(item.dataset.tab);
+                });
+            });
+        }
+
+        function showNewClaimForm() {
+            switchTab('new-claim');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+            
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`)?.classList.add('active');
+        }
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('damage-date').max = today;
+        }
+
+        function initFileUpload() {
+            const uploadArea = document.getElementById('file-upload-area');
+            const fileInput = document.getElementById('image-upload');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+
+        function handleFiles(files) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+            
+            Array.from(files).forEach(file => {
+                if (!validTypes.includes(file.type)) {
+                    AgriGuard.showNotification('Invalid file type. Please upload images only.', 'error');
+                    return;
+                }
+
+                if (uploadedImages.length >= 10) {
+                    AgriGuard.showNotification('Maximum 10 images allowed.', 'warning');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImages.push({
+                        name: file.name,
+                        data: e.target.result
+                    });
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderImagePreviews() {
+            const container = document.getElementById('file-preview');
+            container.innerHTML = '';
+
+            uploadedImages.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'file-preview-item';
+                div.innerHTML = `
+                    <img src="${img.data}" alt="Preview">
+                    <div class="file-preview-remove" onclick="removeImage(${index})">✕</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderImagePreviews();
+        }
+
+        async function detectLocation() {
+            const statusEl = document.getElementById('location-status');
+            statusEl.textContent = 'Detecting location...';
+
+            try {
+                const position = await AgriGuard.getCurrentLocation();
+                document.getElementById('latitude').value = position.lat;
+                document.getElementById('longitude').value = position.lng;
+
+                const district = AgriGuard.getDistrictFromCoords(position.lat, position.lng);
+                document.getElementById('region').value = district;
+
+                const map = document.getElementById('location-map');
+                const newSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${position.lng-0.05}%2C${position.lat-0.05}%2C${position.lng+0.05}%2C${position.lat+0.05}&layer=mapnik&marker=${position.lat}%2C${position.lng}`;
+                map.src = newSrc;
+
+                statusEl.textContent = `✓ Location detected: ${district}`;
+                statusEl.className = 'text-success text-sm';
+            } catch (error) {
+                statusEl.textContent = 'Location access denied. Please enter manually.';
+                statusEl.className = 'text-warning text-sm';
+                
+                document.querySelector('input[name="location-mode"][value="manual"]').checked = true;
+                toggleLocationMode();
+            }
+        }
+
+        function toggleLocationMode() {
+            const mode = document.querySelector('input[name="location-mode"]:checked').value;
+            const autoSection = document.getElementById('location-auto-section');
+            const manualSection = document.getElementById('location-manual-section');
+            
+            if (mode === 'auto') {
+                autoSection.classList.remove('hidden');
+                manualSection.classList.add('hidden');
+            } else {
+                autoSection.classList.add('hidden');
+                manualSection.classList.remove('hidden');
+            }
+        }
+
+        function initFormSubmission() {
+            const form = document.getElementById('claim-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const validation = validateClaimForm();
+                if (!validation.valid) {
+                    return;
+                }
+
+                const claimData = collectFormData();
+                
+                AgriGuard.showLoading('Analyzing your claim...');
+                
+                await processClaimWithAI(claimData);
+            });
+        }
+
+        function validateClaimForm() {
+            const cropType = document.getElementById('crop-type').value;
+            const landSize = document.getElementById('land-size').value;
+            const farmerName = document.getElementById('farmer-name').value;
+            const description = document.getElementById('description').value;
+
+            if (!cropType || !landSize || !farmerName || !description) {
+                AgriGuard.showNotification('Please fill in: Crop Type, Land Size, Full Name, and Description', 'error');
+                return { valid: false };
+            }
+
+            if (parseFloat(landSize) <= 0) {
+                AgriGuard.showNotification('Please enter a valid land size', 'error');
+                return { valid: false };
+            }
+
+            return { valid: true };
+        }
+
+        function collectFormData() {
+            const locationMode = document.querySelector('input[name="location-mode"]:checked').value;
+            
+            let locationData = {
+                mode: locationMode,
+                state: '',
+                city: '',
+                village: '',
+                district: '',
+                coordinates: null
+            };
+            
+            if (locationMode === 'auto') {
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                const district = document.getElementById('region').value || 'Central District';
+                
+                locationData.district = district;
+                if (lat && lng) {
+                    locationData.coordinates = { lat: parseFloat(lat), lng: parseFloat(lng) };
+                }
+            } else {
+                locationData.state = document.getElementById('manual-state').value || '';
+                locationData.city = document.getElementById('manual-city').value || '';
+                locationData.village = document.getElementById('manual-village').value || '';
+                locationData.district = locationData.city || 'Not specified';
+            }
+            
+            return {
+                cropType: document.getElementById('crop-type').value || 'wheat',
+                landSize: parseFloat(document.getElementById('land-size').value) || 1,
+                coveragePercent: parseInt(document.getElementById('coverage-percent').value) || 70,
+                date: document.getElementById('damage-date').value || new Date().toISOString().split('T')[0],
+                region: locationData.district || 'Central District',
+                latitude: locationData.coordinates?.lat || '',
+                longitude: locationData.coordinates?.lng || '',
+                description: document.getElementById('description').value || 'Crop damage assessment requested',
+                farmerName: document.getElementById('farmer-name').value || 'Demo Farmer',
+                farmerId: document.getElementById('farmer-id').value || 'F001',
+                images: uploadedImages.map(img => img.name),
+                location: locationData
+            };
+        }
+
+        async function processClaimWithAI(claimData) {
+            const claimId = AgriGuard.generateId('AG');
+            currentClaimId = claimId;
+
+            const stages = [
+                { name: 'Damage Analysis', icon: '🔍' },
+                { name: 'Weather Matching', icon: '🌤️' },
+                { name: 'Risk Assessment', icon: '⚖️' },
+                { name: 'Fraud Detection', icon: '🛡️' }
+            ];
+
+            let stageIndex = 0;
+
+            const processUI = setInterval(() => {
+                if (stageIndex >= stages.length) {
+                    clearInterval(processUI);
+                    return;
+                }
+
+                const stage = stages[stageIndex];
+                showProcessingStage(stage.name, stage.icon, stageIndex, stages.length);
+                stageIndex++;
+            }, 800);
+
+            await new Promise(resolve => setTimeout(resolve, 3500));
+
+            const historicalClaims = AgriGuard.getClaims().filter(c => c.farmerId === claimData.farmerId);
+            
+            aiResultData = await AIEngine.processClaim(claimData, (name, current, total) => {
+                showProcessingStage(name, '', current, total);
+            });
+
+            const claim = {
+                id: claimId,
+                ...claimData,
+                status: aiResultData.decision,
+                aiResult: aiResultData,
+                createdAt: new Date().toISOString()
+            };
+
+            AgriGuard.saveClaim(claim);
+            AgriGuard.hideLoading();
+
+            showResultsPanel(claim, aiResultData);
+        }
+
+        function showProcessingStage(name, icon, current, total) {
+            let panel = document.getElementById('processing-panel');
+            if (!panel) return;
+
+            const stages = panel.querySelectorAll('.processing-stage');
+            stages.forEach((stage, index) => {
+                stage.classList.remove('active', 'complete');
+                if (index < current) stage.classList.add('complete');
+                if (index === current) stage.classList.add('active');
+            });
+        }
+
+        function showResultsPanel(claim, result) {
+            const compensation = FinanceEngine.calculateCompensation(claim, result);
+            
+            const decisionClass = `decision-${result.decision}`;
+            const decisionText = result.decision.charAt(0).toUpperCase() + result.decision.slice(1);
+
+            const html = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🎯 AI Analysis Results</h3>
+                        <span class="badge ${AgriGuard.getStatusBadgeClass(result.decision)}">${decisionText}</span>
+                    </div>
+
+                    <div class="results-grid mb-lg">
+                        <div class="result-card card">
+                            <div class="result-value" style="color: var(--accent)">${result.damageScore}%</div>
+                            <div class="result-label">Damage Severity</div>
+                        </div>
+                        <div class="result-card card">
+                            <div class="result-value" style="color: var(--info)">${result.weatherMatch}%</div>
+                            <div class="result-label">Weather Match</div>
+                        </div>
+                        <div class="result-card card">
+                            <div class="result-value" style="color: ${result.fraudRisk > 50 ? 'var(--danger)' : 'var(--success)'}">${result.fraudRisk}%</div>
+                            <div class="result-label">Fraud Risk</div>
+                        </div>
+                        <div class="result-card card">
+                            <div class="result-value" style="color: var(--success)">${result.trustModifier}%</div>
+                            <div class="result-label">Trust Score</div>
+                        </div>
+                        <div class="result-card card">
+                            <div class="result-value" style="color: var(--warning)">${result.finalScore}%</div>
+                            <div class="result-label">Final AI Score</div>
+                        </div>
+                        <div class="result-card card">
+                            <div class="result-value" style="color: var(--primary-light)">${Math.round(75 + Math.random() * 20)}%</div>
+                            <div class="result-label">AI Confidence</div>
+                        </div>
+                    </div>
+
+                    <div class="card ${decisionClass} mb-lg">
+                        <h3 class="text-xl font-bold text-center mb-sm">Claim ${decisionText}</h3>
+                        <p class="text-muted text-center">${AIEngine.getDecisionExplanation(result)}</p>
+                    </div>
+
+                    ${result.decision === 'approved' ? `
+                        <div class="card mb-lg">
+                            <h3 class="card-title mb-md">💰 Compensation Breakdown</h3>
+                            <ul class="breakdown-list">
+                                <li class="breakdown-item">
+                                    <span>Base Amount (${claim.landSize} acres × ₹${FinanceEngine.BASE_RATES[claim.cropType]}/acre)</span>
+                                    <span>${AgriGuard.formatCurrency(compensation.baseAmount)}</span>
+                                </li>
+                                <li class="breakdown-item">
+                                    <span>Damage Adjusted (${compensation.damageScore}%)</span>
+                                    <span>${AgriGuard.formatCurrency(compensation.damageAdjusted)}</span>
+                                </li>
+                                <li class="breakdown-item">
+                                    <span>Coverage Applied (${compensation.coveragePercent}%)</span>
+                                    <span>${AgriGuard.formatCurrency(compensation.coverageAdjusted)}</span>
+                                </li>
+                                ${compensation.adjustments.map(adj => `
+                                    <li class="breakdown-item">
+                                        <span>${adj.description}</span>
+                                        <span class="${adj.amount >= 0 ? 'text-success' : 'text-danger'}">
+                                            ${adj.amount >= 0 ? '+' : ''}${AgriGuard.formatCurrency(adj.amount)}
+                                        </span>
+                                    </li>
+                                `).join('')}
+                                <li class="breakdown-item">
+                                    <span>Final Payout Amount</span>
+                                    <span>${AgriGuard.formatCurrency(compensation.finalAmount)}</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="card-title mb-md">🏦 Payment Details</h3>
+                            <form id="payment-form">
+                                <div class="grid grid-2 gap-lg">
+                                    <div class="form-group">
+                                        <label class="form-label">Bank Account Number *</label>
+                                        <input type="text" id="bank-account" placeholder="9-18 digits" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">IFSC Code</label>
+                                        <input type="text" id="ifsc-code" placeholder="e.g., SBIN0001234">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Account Holder Name *</label>
+                                    <input type="text" id="account-holder" placeholder="As per bank records" required>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-lg mt-md">
+                                    💳 Receive Payment
+                                </button>
+                            </form>
+                        </div>
+                    ` : `
+                        <div class="card">
+                            <div class="text-center">
+                                <p class="text-muted mb-md">Your claim requires ${result.decision === 'review' ? 'manual review' : 'more documentation'}.</p>
+                                <button class="btn btn-outline" onclick="loadMyClaims()">View My Claims</button>
+                            </div>
+                        </div>
+                    `}
+                </div>
+            `;
+
+            document.getElementById('claim-details-content').innerHTML = html;
+            switchTab('claim-details');
+
+            if (result.decision === 'approved') {
+                initPaymentForm(claim, compensation);
+            }
+        }
+
+        function initPaymentForm(claim, compensation) {
+            const form = document.getElementById('payment-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const paymentDetails = {
+                    accountNumber: document.getElementById('bank-account').value,
+                    ifscCode: document.getElementById('ifsc-code').value,
+                    accountHolder: document.getElementById('account-holder').value
+                };
+
+                AgriGuard.showLoading('Processing payment...');
+
+                const result = await FinanceEngine.processPayment(claim, compensation, paymentDetails);
+
+                AgriGuard.hideLoading();
+
+                if (result.success) {
+                    showPaymentSuccess(result);
+                } else {
+                    AgriGuard.showNotification(result.error, 'error');
+                    
+                    if (result.retryable) {
+                        setTimeout(async () => {
+                            const retry = await FinanceEngine.retryPayment(claim, compensation, paymentDetails);
+                            if (retry.success) {
+                                showPaymentSuccess(retry);
+                            }
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        function showPaymentSuccess(result) {
+            const html = `
+                <div class="card">
+                    <div class="payment-success">
+                        <div class="text-3xl mb-md">✅</div>
+                        <h3 class="text-xl font-bold text-success mb-sm">Payment Successful!</h3>
+                        <p class="text-muted mb-lg">Your compensation has been processed</p>
+                        
+                        <div class="receipt">
+                            <div class="receipt-header">
+                                <div class="receipt-title">🌾 AgriGuard AI Smart</div>
+                                <div>Payment Receipt</div>
+                            </div>
+                            <div class="receipt-row">
+                                <span>Transaction ID</span>
+                                <span>${result.transaction.id}</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>Claim ID</span>
+                                <span>${result.transaction.claimId}</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>Farmer Name</span>
+                                <span>${result.transaction.farmerName}</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>Bank Account</span>
+                                <span>${result.transaction.bankAccount}</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span>Payment Date</span>
+                                <span>${AgriGuard.formatDate(result.transaction.date)}</span>
+                            </div>
+                            <div class="receipt-total">
+                                <span>Amount Paid</span>
+                                <span>${AgriGuard.formatCurrency(result.transaction.amount)}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-md mt-lg">
+                            <button class="btn btn-primary" onclick="printReceipt('${result.transaction.id}')">
+                                🖨️ Print Receipt
+                            </button>
+                            <button class="btn btn-outline" onclick="loadMyClaims()">
+                                View My Claims
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('claim-details-content').innerHTML = html;
+            AgriGuard.showNotification('Payment processed successfully!', 'success');
+        }
+
+        function printReceipt(transactionId) {
+            const transactions = AgriGuard.getTransactions();
+            const transaction = transactions.find(t => t.id === transactionId);
+            
+            if (transaction) {
+                AgriGuard.printReceipt(transaction);
+            }
+        }
+
+        function loadMyClaims() {
+            const claims = AgriGuard.getClaims();
+            const tbody = document.getElementById('claims-tbody');
+            const noClaims = document.getElementById('no-claims');
+
+            if (claims.length === 0) {
+                tbody.innerHTML = '';
+                noClaims.classList.remove('hidden');
+                return;
+            }
+
+            noClaims.classList.add('hidden');
+
+            tbody.innerHTML = claims.map(claim => `
+                <tr>
+                    <td><code class="text-sm">${claim.id}</code></td>
+                    <td>${AgriGuard.formatDate(claim.date)}</td>
+                    <td>${AgriGuard.getCropName(claim.cropType)}</td>
+                    <td>${claim.landSize} acres</td>
+                    <td>${claim.aiResult?.damageScore || '-'}%</td>
+                    <td><span class="badge ${AgriGuard.getStatusBadgeClass(claim.status)}">${claim.status}</span></td>
+                    <td>${claim.payoutAmount ? AgriGuard.formatCurrency(claim.payoutAmount) : '-'}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewClaimDetails('${claim.id}')">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            switchTab('my-claims');
+        }
+
+        function viewClaimDetails(claimId) {
+            const claim = AgriGuard.getClaimById(claimId);
+            if (!claim) return;
+
+            const result = claim.aiResult;
+            const compensation = result ? FinanceEngine.calculateCompensation(claim, result) : null;
+
+            const html = `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">Claim Details: ${claim.id}</h3>
+                            <p class="text-muted text-sm">Submitted on ${AgriGuard.formatDate(claim.createdAt)}</p>
+                        </div>
+                        <span class="badge ${AgriGuard.getStatusBadgeClass(claim.status)}">${claim.status}</span>
+                    </div>
+
+                    <div class="grid grid-2 gap-lg mb-lg">
+                        <div>
+                            <h4 class="font-bold mb-sm">Crop Information</h4>
+                            <p><strong>Crop:</strong> ${AgriGuard.getCropName(claim.cropType)}</p>
+                            <p><strong>Land Size:</strong> ${claim.landSize} acres</p>
+                            <p><strong>Coverage:</strong> ${claim.coveragePercent}%</p>
+                            <p><strong>Region:</strong> ${claim.region}</p>
+                            <p><strong>Date of Damage:</strong> ${AgriGuard.formatDate(claim.date)}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-sm">Farmer Information</h4>
+                            <p><strong>Name:</strong> ${claim.farmerName}</p>
+                            <p><strong>ID:</strong> ${claim.farmerId}</p>
+                        </div>
+                    </div>
+
+                    ${result ? `
+                        <div class="mb-lg">
+                            <h4 class="font-bold mb-sm">AI Analysis</h4>
+                            <div class="grid grid-3 gap-md">
+                                <div class="card">
+                                    <div class="text-lg font-bold">${result.damageScore}%</div>
+                                    <div class="text-sm text-muted">Damage Score</div>
+                                </div>
+                                <div class="card">
+                                    <div class="text-lg font-bold">${result.weatherMatch}%</div>
+                                    <div class="text-sm text-muted">Weather Match</div>
+                                </div>
+                                <div class="card">
+                                    <div class="text-lg font-bold ${result.fraudRisk > 50 ? 'text-danger' : 'text-success'}">${result.fraudRisk}%</div>
+                                    <div class="text-sm text-muted">Fraud Risk</div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${compensation ? `
+                        <div class="mb-lg">
+                            <h4 class="font-bold mb-sm">Compensation</h4>
+                            <div class="card">
+                                <ul class="breakdown-list">
+                                    <li class="breakdown-item">
+                                        <span>Base Amount</span>
+                                        <span>${AgriGuard.formatCurrency(compensation.baseAmount)}</span>
+                                    </li>
+                                    <li class="breakdown-item">
+                                        <span>Final Payout</span>
+                                        <span class="text-success font-bold">${AgriGuard.formatCurrency(compensation.finalAmount)}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${claim.transactionId ? `
+                        <div class="mb-lg">
+                            <h4 class="font-bold mb-sm">Payment Information</h4>
+                            <div class="card">
+                                <p><strong>Transaction ID:</strong> ${claim.transactionId}</p>
+                                <p><strong>Status:</strong> ${claim.payoutStatus}</p>
+                                <div class="mt-md">
+                                    <button class="btn btn-outline btn-sm" onclick="printReceipt('${claim.transactionId}')">
+                                        🖨️ Print Receipt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <button class="btn btn-outline" onclick="loadMyClaims()">← Back to Claims</button>
+                </div>
+            `;
+
+            document.getElementById('claim-details-content').innerHTML = html;
+            switchTab('claim-details');
+        }
+
+        function resetForm() {
+            document.getElementById('claim-form').reset();
+            uploadedImages = [];
+            renderImagePreviews();
+            document.getElementById('location-status').textContent = '';
+        }
+
+        document.getElementById('claim-filter').addEventListener('change', function() {
+            const filter = this.value;
+            const claims = AgriGuard.getClaims();
+            
+            const tbody = document.getElementById('claims-tbody');
+            
+            let filtered = claims;
+            if (filter !== 'all') {
+                filtered = claims.filter(c => c.status === filter);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('no-claims').classList.remove('hidden');
+            } else {
+                document.getElementById('no-claims').classList.add('hidden');
+                tbody.innerHTML = filtered.map(claim => `
+                    <tr>
+                        <td><code class="text-sm">${claim.id}</code></td>
+                        <td>${AgriGuard.formatDate(claim.date)}</td>
+                        <td>${AgriGuard.getCropName(claim.cropType)}</td>
+                        <td>${claim.landSize} acres</td>
+                        <td>${claim.aiResult?.damageScore || '-'}%</td>
+                        <td><span class="badge ${AgriGuard.getStatusBadgeClass(claim.status)}">${claim.status}</span></td>
+                        <td>${claim.payoutAmount ? AgriGuard.formatCurrency(claim.payoutAmount) : '-'}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="viewClaimDetails('${claim.id}')">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+</html>

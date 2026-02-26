@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Officer Dashboard - AgriGuard AI Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        .modal.hidden { display: none; }
+        .modal-content {
+            background: var(--dark-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .modal-close {
+            background: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            padding: 4px;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .risk-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .risk-low { background: var(--success); }
+        .risk-medium { background: var(--warning); }
+        .risk-high { background: var(--danger); }
+    </style>
+</head>
+<body>
+    <header class="nav-header">
+        <div class="container nav-content">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">🌾</div>
+                <span>AgriGuard AI Smart</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#" class="nav-link active" data-tab="dashboard" data-i18n="nav.dashboard">Dashboard</a>
+                <a href="#" class="nav-link" data-tab="claims" data-i18n="nav.allClaims">All Claims</a>
+                <a href="#" class="nav-link" data-tab="high-risk" data-i18n="nav.highRisk">High Risk</a>
+                <a href="index.html" class="nav-link" data-i18n="nav.logout">Logout</a>
+                
+                <div class="lang-dropdown">
+                    <a href="#" id="lang-toggle" class="nav-link lang-link">
+                        🌐 <span id="lang-current">English</span>
+                    </a>
+                    <div id="lang-dropdown" class="lang-dropdown-menu">
+                        <a href="#" data-lang="en" data-i18n="lang.en">English</a>
+                        <a href="#" data-lang="hi" data-i18n="lang.hi">हिन्दी</a>
+                        <a href="#" data-lang="te" data-i18n="lang.te">తెలుగు</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="dashboard-title" data-i18n="dashboard.officer.title">Insurance Officer Dashboard</h1>
+                    <p class="text-muted" data-i18n="dashboard.officer.subtitle">Manage and review claims in your jurisdiction</p>
+                </div>
+                <div class="flex gap-md">
+                    <button class="btn btn-outline" onclick="refreshData()">
+                        🔄 <span data-i18n="btn.refresh">Refresh</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportClaims()">
+                        📥 <span data-i18n="btn.exportCsv">Export CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label" data-i18n="table.claimId">Total Claims</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-success" id="stat-approved">0</div>
+                    <div class="stat-label" data-i18n="status.approved">Approved</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-warning" id="stat-review">0</div>
+                    <div class="stat-label" data-i18n="status.review">Under Review</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-danger" id="stat-high-risk">0</div>
+                    <div class="stat-label" data-i18n="nav.highRisk">High Risk</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <aside class="dashboard-sidebar">
+                    <nav class="dashboard-nav-vertical">
+                        <a href="#" class="dashboard-nav-item active" data-tab="dashboard">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text" data-i18n="tab.dashboard">Dashboard</span>
+                        </a>
+                        <a href="#" class="dashboard-nav-item" data-tab="claims">
+                            <span class="nav-icon">📋</span>
+                            <span class="nav-text" data-i18n="tab.claims">All Claims</span>
+                        </a>
+                        <a href="#" class="dashboard-nav-item" data-tab="high-risk">
+                            <span class="nav-icon">⚠️</span>
+                            <span class="nav-text" data-i18n="tab.highRisk">High Risk</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <div class="dashboard-content">
+
+            <div id="dashboard" class="tab-content active">
+                <div class="grid grid-2 gap-lg">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Claims</h3>
+                        </div>
+                        <div id="recent-claims-list">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Actions</h3>
+                        </div>
+                        <div class="grid gap-md">
+                            <button class="btn btn-outline" onclick="switchTab('claims')">
+                                📋 View All Claims
+                            </button>
+                            <button class="btn btn-outline" onclick="switchTab('high-risk')">
+                                ⚠️ Review High Risk Claims
+                            </button>
+                            <button class="btn btn-outline" onclick="exportClaims()">
+                                📥 Export Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="claims" class="tab-content">
+                <div class="card">
+                    <div class="filter-bar">
+                        <select id="filter-status" onchange="applyFilters()">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="review">Under Review</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <select id="filter-region" onchange="applyFilters()">
+                            <option value="all">All Regions</option>
+                            <option value="North District">North District</option>
+                            <option value="South District">South District</option>
+                            <option value="East District">East District</option>
+                            <option value="West District">West District</option>
+                            <option value="Central District">Central District</option>
+                            <option value="Coastal Region">Coastal Region</option>
+                            <option value="Hill Region">Hill Region</option>
+                            <option value="Plain Region">Plain Region</option>
+                        </select>
+                        <select id="filter-fraud" onchange="applyFilters()">
+                            <option value="all">All Risk Levels</option>
+                            <option value="low">Low Risk (&lt;30%)</option>
+                            <option value="medium">Medium Risk (30-60%)</option>
+                            <option value="high">High Risk (&gt;60%)</option>
+                        </select>
+                        <input type="text" id="search-claims" placeholder="Search by ID or name..." oninput="applyFilters()" style="max-width: 250px;">
+                    </div>
+
+                    <div class="table-container-enhanced">
+                        <div class="table-scroll-wrapper">
+                            <table id="claims-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="table.claimId">Claim ID</th>
+                                        <th data-i18n="table.farmer">Farmer</th>
+                                        <th data-i18n="table.crop">Crop</th>
+                                        <th data-i18n="table.land">Land</th>
+                                        <th data-i18n="table.region">Region</th>
+                                        <th data-i18n="table.aiScore">AI Score</th>
+                                    <th data-i18n="table.fraudRisk">Fraud Risk</th>
+                                    <th data-i18n="table.status">Status</th>
+                                    <th data-i18n="table.actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="claims-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-claims" class="empty-state hidden">
+                        <div class="empty-state-icon">📋</div>
+                        <h3 class="empty-state-title" data-i18n="empty.noResults">No claims match your current filters.</h3>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div id="high-risk" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚠️ High Risk Claims Requiring Review</h3>
+                    </div>
+                    <div class="table-container-enhanced">
+                        <div class="table-scroll-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="table.claimId">Claim ID</th>
+                                        <th data-i18n="table.farmer">Farmer</th>
+                                        <th data-i18n="table.crop">Crop</th>
+                                        <th data-i18n="table.damage">Damage</th>
+                                        <th data-i18n="table.fraudRisk">Fraud Risk</th>
+                                        <th data-i18n="table.aiScore">AI Score</th>
+                                        <th>Issues</th>
+                                        <th data-i18n="table.actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="high-risk-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="no-high-risk" class="empty-state hidden">
+                        <div class="empty-state-icon">✅</div>
+                        <h3 class="empty-state-title" data-i18n="empty.noHighRisk">All claims are within acceptable risk levels.</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="claim-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Claim Details</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modal-body" class="modal-body">
+            </div>
+            <div class="modal-footer" id="modal-footer">
+            </div>
+        </div>
+    </div>
+
+    <div id="chatbot-toggle" class="chatbot-toggle" title="Chat with AgriGuard Assistant">💬</div>
+    <div id="chatbot-panel" class="chatbot-panel hidden">
+        <div class="chatbot-header">
+            <span class="chatbot-title">🌾 AgriGuard Assistant</span>
+            <div class="chatbot-header-actions">
+                <button id="chatbot-speak" class="chatbot-header-btn" title="Toggle auto-speak">🔊</button>
+                <button id="chatbot-close" class="chatbot-close">✕</button>
+            </div>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages"></div>
+        <div class="chatbot-input">
+            <button id="chatbot-mic" class="chatbot-mic-btn" title="Voice input">🎤</button>
+            <input type="text" id="chatbot-input-field" placeholder="Type your message..." aria-label="Chat input">
+            <button id="chatbot-send" class="btn btn-accent btn-sm">Send</button>
+        </div>
+    </div>
+
+    <script src="js/core.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/finance.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/i18n.js"></script>
+    <script>
+        // ===== ROLE PROTECTION =====
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        if (!currentUser || currentUser.role !== "officer") {
+            window.location.href = "index.html";
+        }
+        
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "index.html";
+        }
+
+        let allClaims = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initLanguage();
+            initTabs();
+            loadClaims();
+            updateStats();
+            if (typeof Chatbot !== "undefined") {
+                Chatbot.init();
+            }
+        });
+
+        function initTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const navLinks = document.querySelectorAll('.nav-link[data-tab]');
+            const dashboardNavItems = document.querySelectorAll('.dashboard-nav-item');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(link.dataset.tab);
+                });
+            });
+
+            dashboardNavItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(item.dataset.tab);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.dashboard-nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`)?.classList.add('active');
+            document.querySelector(`.dashboard-nav-item[data-tab="${tabId}"]`)?.classList.add('active');
+        }
+
+        function loadClaims() {
+            allClaims = AgriGuard.getClaims();
+            renderAllClaims();
+            renderHighRiskClaims();
+            renderRecentClaims();
+        }
+
+        function updateStats() {
+            const total = allClaims.length;
+            const approved = allClaims.filter(c => c.status === 'approved').length;
+            const review = allClaims.filter(c => c.status === 'review' || c.status === 'pending').length;
+            const highRisk = allClaims.filter(c => c.aiResult && c.aiResult.fraudRisk > 60).length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-approved').textContent = approved;
+            document.getElementById('stat-review').textContent = review;
+            document.getElementById('stat-high-risk').textContent = highRisk;
+        }
+
+        function renderAllClaims() {
+            const tbody = document.getElementById('claims-tbody');
+            const filtered = getFilteredClaims();
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('no-claims').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('no-claims').classList.add('hidden');
+
+            tbody.innerHTML = filtered.map(claim => {
+                const riskClass = getRiskClass(claim.aiResult?.fraudRisk);
+                return `
+                    <tr>
+                        <td><code class="text-sm">${claim.id}</code></td>
+                        <td>${claim.farmerName}</td>
+                        <td>${AgriGuard.getCropName(claim.cropType)}</td>
+                        <td>${claim.landSize} ac</td>
+                        <td>${claim.region}</td>
+                        <td>
+                            <div class="flex gap-sm">
+                                <span class="badge ${AgriGuard.getStatusBadgeClass(claim.aiResult?.decision)}">${claim.aiResult?.finalScore || '-'}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="risk-indicator ${riskClass}"></span>
+                            ${claim.aiResult?.fraudRisk || 0}%
+                        </td>
+                        <td><span class="badge ${AgriGuard.getStatusBadgeClass(claim.status)}">${claim.status}</span></td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="viewClaim('${claim.id}')">View</button>
+                            ${claim.status === 'review' ? `<button class="btn btn-success btn-sm" onclick="overrideDecision('${claim.id}', 'approved')">Approve</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderHighRiskClaims() {
+            const tbody = document.getElementById('high-risk-tbody');
+            const highRisk = allClaims.filter(c => c.aiResult && c.aiResult.fraudRisk > 60);
+
+            if (highRisk.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('no-high-risk').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('no-high-risk').classList.add('hidden');
+
+            tbody.innerHTML = highRisk.map(claim => {
+                const issues = getRiskIssues(claim);
+                return `
+                    <tr>
+                        <td><code class="text-sm">${claim.id}</code></td>
+                        <td>${claim.farmerName}</td>
+                        <td>${AgriGuard.getCropName(claim.cropType)}</td>
+                        <td>${claim.aiResult?.damageScore || 0}%</td>
+                        <td class="text-danger font-bold">${claim.aiResult?.fraudRisk || 0}%</td>
+                        <td>${claim.aiResult?.finalScore || 0}%</td>
+                        <td>${issues.join(', ')}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="viewClaim('${claim.id}')">Review</button>
+                            <button class="btn btn-danger btn-sm" onclick="overrideDecision('${claim.id}', 'rejected')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecentClaims() {
+            const container = document.getElementById('recent-claims-list');
+            const recent = allClaims.slice(-5).reverse();
+
+            if (recent.length === 0) {
+                container.innerHTML = '<p class="text-muted">No recent claims</p>';
+                return;
+            }
+
+            container.innerHTML = recent.map(claim => `
+                <div class="flex-between mb-md" style="padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <div>
+                        <div class="font-semibold">${claim.farmerName}</div>
+                        <div class="text-sm text-muted">${claim.id} • ${AgriGuard.getCropName(claim.cropType)}</div>
+                    </div>
+                    <span class="badge ${AgriGuard.getStatusBadgeClass(claim.status)}">${claim.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function getFilteredClaims() {
+            const status = document.getElementById('filter-status').value;
+            const region = document.getElementById('filter-region').value;
+            const fraud = document.getElementById('filter-fraud').value;
+            const search = document.getElementById('search-claims').value.toLowerCase();
+
+            return allClaims.filter(claim => {
+                if (status !== 'all' && claim.status !== status) return false;
+                if (region !== 'all' && claim.region !== region) return false;
+                
+                if (fraud !== 'all') {
+                    const risk = claim.aiResult?.fraudRisk || 0;
+                    if (fraud === 'low' && risk >= 30) return false;
+                    if (fraud === 'medium' && (risk < 30 || risk > 60)) return false;
+                    if (fraud === 'high' && risk <= 60) return false;
+                }
+
+                if (search && !claim.id.toLowerCase().includes(search) && 
+                    !claim.farmerName.toLowerCase().includes(search)) return false;
+
+                return true;
+            });
+        }
+
+        function applyFilters() {
+            renderAllClaims();
+        }
+
+        function getRiskClass(risk) {
+            if (risk === undefined || risk < 30) return 'risk-low';
+            if (risk < 60) return 'risk-medium';
+            return 'risk-high';
+        }
+
+        function getRiskIssues(claim) {
+            const issues = [];
+            const result = claim.aiResult;
+
+            if (result) {
+                if (result.fraudRisk > 60) issues.push('High fraud risk');
+                if (result.damageScore < 30) issues.push('Low damage');
+                if (result.weatherMatch < 50) issues.push('Weather mismatch');
+                if (result.trustModifier < 40) issues.push('Low trust score');
+            }
+
+            if (claim.landSize > 50) issues.push('Large land size');
+
+            return issues.length ? issues : ['Review needed'];
+        }
+
+        function viewClaim(claimId) {
+            const claim = allClaims.find(c => c.id === claimId);
+            if (!claim) return;
+
+            const result = claim.aiResult;
+
+            const html = `
+                <div class="grid grid-2 gap-lg mb-lg">
+                    <div>
+                        <h4 class="font-bold mb-sm">Claim Information</h4>
+                        <p><strong>ID:</strong> ${claim.id}</p>
+                        <p><strong>Date:</strong> ${AgriGuard.formatDate(claim.date)}</p>
+                        <p><strong>Region:</strong> ${claim.region}</p>
+                        <p><strong>Description:</strong> ${claim.description || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-sm">Farmer Information</h4>
+                        <p><strong>Name:</strong> ${claim.farmerName}</p>
+                        <p><strong>ID:</strong> ${claim.farmerId}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-3 gap-md mb-lg">
+                    <div class="card">
+                        <div class="text-lg font-bold">${result?.damageScore || 0}%</div>
+                        <div class="text-sm text-muted">Damage Score</div>
+                    </div>
+                    <div class="card">
+                        <div class="text-lg font-bold">${result?.weatherMatch || 0}%</div>
+                        <div class="text-sm text-muted">Weather Match</div>
+                    </div>
+                    <div class="card">
+                        <div class="text-lg font-bold ${result?.fraudRisk > 50 ? 'text-danger' : 'text-success'}">${result?.fraudRisk || 0}%</div>
+                        <div class="text-sm text-muted">Fraud Risk</div>
+                    </div>
+                </div>
+
+                <div class="card mb-lg">
+                    <h4 class="font-bold mb-sm">AI Analysis Details</h4>
+                    <ul class="breakdown-list">
+                        <li class="breakdown-item">
+                            <span>Final AI Score</span>
+                            <span>${result?.finalScore || 0}%</span>
+                        </li>
+                        <li class="breakdown-item">
+                            <span>AI Decision</span>
+                            <span>${result?.decision || 'unknown'}</span>
+                        </li>
+                        <li class="breakdown-item">
+                            <span>Trust Score</span>
+                            <span>${result?.trustModifier || 0}%</span>
+                        </li>
+                        <li class="breakdown-item">
+                            <span>Weather Condition</span>
+                            <span>${result?.weatherData?.condition || 'N/A'}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-sm">Risk Assessment</h4>
+                    <p>${getRiskIssues(claim).join(', ')}</p>
+                </div>
+            `;
+
+            document.getElementById('modal-body').innerHTML = html;
+
+            let footerHtml = `<button class="btn btn-outline" onclick="closeModal()">Close</button>`;
+            
+            if (claim.status === 'review') {
+                footerHtml += `
+                    <button class="btn btn-danger" onclick="overrideDecision('${claim.id}', 'rejected')">Reject</button>
+                    <button class="btn btn-success" onclick="overrideDecision('${claim.id}', 'approved')">Approve</button>
+                `;
+            }
+
+            document.getElementById('modal-footer').innerHTML = footerHtml;
+            document.getElementById('claim-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('claim-modal').classList.add('hidden');
+        }
+
+        function overrideDecision(claimId, decision) {
+            const claim = allClaims.find(c => c.id === claimId);
+            if (!claim) return;
+
+            claim.status = decision;
+            claim.aiResult.decision = decision;
+            claim.aiResult.finalScore = decision === 'approved' ? 85 : 35;
+
+            AgriGuard.saveClaim(claim);
+            closeModal();
+            loadClaims();
+            updateStats();
+
+            AgriGuard.showNotification(`Claim ${decision} successfully`, 'success');
+        }
+
+        function refreshData() {
+            loadClaims();
+            updateStats();
+            AgriGuard.showNotification('Data refreshed', 'info');
+        }
+
+        function exportClaims() {
+            const claims = getFilteredClaims();
+            if (claims.length === 0) {
+                AgriGuard.showNotification('No claims to export', 'warning');
+                return;
+            }
+
+            const exportData = claims.map(c => ({
+                ClaimID: c.id,
+                FarmerName: c.farmerName,
+                FarmerID: c.farmerId,
+                CropType: AgriGuard.getCropName(c.cropType),
+                LandSize: c.landSize,
+                Region: c.region,
+                Date: c.date,
+                DamageScore: c.aiResult?.damageScore || 0,
+                WeatherMatch: c.aiResult?.weatherMatch || 0,
+                FraudRisk: c.aiResult?.fraudRisk || 0,
+                AIScore: c.aiResult?.finalScore || 0,
+                Status: c.status,
+                PayoutStatus: c.payoutStatus || 'pending',
+                PayoutAmount: c.payoutAmount || 0
+            }));
+
+            AgriGuard.downloadCSV(exportData, `claims_export_${new Date().toISOString().split('T')[0]}.csv`);
+            AgriGuard.showNotification('Claims exported successfully', 'success');
+        }
+
+        document.getElementById('claim-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>

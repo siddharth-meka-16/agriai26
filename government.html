@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Dashboard - AgriGuard AI Smart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+    <header class="nav-header">
+        <div class="container nav-content">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">🌾</div>
+                <span>AgriGuard AI Smart</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#" class="nav-link active" data-i18n="nav.dashboard">Dashboard</a>
+                <a href="index.html" class="nav-link" data-i18n="nav.logout">Logout</a>
+                
+                <div class="lang-dropdown">
+                    <a href="#" id="lang-toggle" class="nav-link lang-link">
+                        🌐 <span id="lang-current">English</span>
+                    </a>
+                    <div id="lang-dropdown" class="lang-dropdown-menu">
+                        <a href="#" data-lang="en" data-i18n="lang.en">English</a>
+                        <a href="#" data-lang="hi" data-i18n="lang.hi">हिन्दी</a>
+                        <a href="#" data-lang="te" data-i18n="lang.te">తెలుగు</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="dashboard-title" data-i18n="dashboard.government.title">Government Dashboard</h1>
+                    <p class="text-muted" data-i18n="dashboard.government.subtitle">National agricultural insurance analytics and insights</p>
+                </div>
+                <div class="flex gap-md">
+                    <button class="btn btn-outline" onclick="refreshCharts()">
+                        🔄 <span data-i18n="btn.refreshData">Refresh Data</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportReport()">
+                        📥 <span data-i18n="btn.exportReport">Export Report</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card card">
+                    <div class="stat-value" id="stat-total-claims">0</div>
+                    <div class="stat-label" data-i18n="table.claimId">Total Claims</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-success" id="stat-approved">0</div>
+                    <div class="stat-label" data-i18n="status.approved">Approved</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-warning" id="stat-review">0</div>
+                    <div class="stat-label" data-i18n="status.review">Under Review</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value" id="stat-total-payout">₹0</div>
+                    <div class="stat-label" data-i18n="table.payout">Total Payout</div>
+                </div>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 32px;">
+                <div class="stat-card card">
+                    <div class="stat-value text-accent" id="stat-avg-score">0%</div>
+                    <div class="stat-label">Avg Processing Score</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-info" id="stat-approval-rate">0%</div>
+                    <div class="stat-label">Approval Rate</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-danger" id="stat-fraud-detected">0</div>
+                    <div class="stat-label" data-i18n="nav.highRisk">High Risk Claims</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value text-success" id="stat-avg-payout">₹0</div>
+                    <div class="stat-label">Average Payout</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 Claims by Region</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="claims-region-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📈 Fraud Trend Analysis</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="fraud-trend-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3 class="card-title">🍩 Damage Distribution</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="damage-distribution-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3 class="card-title">💰 Payout by Crop Type</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="payout-crop-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 gap-lg mt-xl">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🏆 Top Regions by Claims</h3>
+                    </div>
+                    <div id="top-regions">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚠️ High Risk Zones</h3>
+                    </div>
+                    <div id="high-risk-zones">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-xl">
+                <div class="card-header">
+                    <h3 class="card-title">📋 Recent Transactions</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Claim ID</th>
+                                <th>Farmer</th>
+                                <th>Crop</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-tbody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-transactions" class="empty-state hidden">
+                    <p>No transactions found</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="chatbot-toggle" class="chatbot-toggle" title="Chat with AgriGuard Assistant">💬</div>
+    <div id="chatbot-panel" class="chatbot-panel hidden">
+        <div class="chatbot-header">
+            <span class="chatbot-title">🌾 AgriGuard Assistant</span>
+            <div class="chatbot-header-actions">
+                <button id="chatbot-speak" class="chatbot-header-btn" title="Toggle auto-speak">🔊</button>
+                <button id="chatbot-close" class="chatbot-close">✕</button>
+            </div>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages"></div>
+        <div class="chatbot-input">
+            <button id="chatbot-mic" class="chatbot-mic-btn" title="Voice input">🎤</button>
+            <input type="text" id="chatbot-input-field" placeholder="Type your message..." aria-label="Chat input">
+            <button id="chatbot-send" class="btn btn-accent btn-sm">Send</button>
+        </div>
+    </div>
+
+    <script src="js/core.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/finance.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/i18n.js"></script>
+    <script>
+        // ===== ROLE PROTECTION =====
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        if (!currentUser || currentUser.role !== "government") {
+            window.location.href = "index.html";
+        }
+        
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "index.html";
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initLanguage();
+            initializeDashboard();
+            if (typeof Chatbot !== "undefined") {
+                Chatbot.init();
+            }
+        });
+
+        function initializeDashboard() {
+            Analytics.initCharts();
+            updateTopRegions();
+            updateHighRiskZones();
+            loadRecentTransactions();
+            updateExtendedStats();
+        }
+
+        function refreshCharts() {
+            Analytics.refreshAllCharts();
+            updateTopRegions();
+            updateHighRiskZones();
+            loadRecentTransactions();
+            updateExtendedStats();
+            AgriGuard.showNotification('Dashboard refreshed', 'success');
+        }
+
+        function updateTopRegions() {
+            const claims = AgriGuard.getClaims();
+            const regionCount = {};
+
+            AgriGuard.REGIONS.forEach(region => regionCount[region] = 0);
+            claims.forEach(claim => {
+                if (regionCount[claim.region] !== undefined) {
+                    regionCount[claim.region]++;
+                }
+            });
+
+            const sorted = Object.entries(regionCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const html = sorted.map(([region, count], index) => `
+                <div class="flex-between mb-md" style="padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <div class="flex gap-md">
+                        <span class="text-xl font-bold text-muted">${index + 1}</span>
+                        <div>
+                            <div class="font-semibold">${region}</div>
+                            <div class="text-sm text-muted">${count} claims</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar" style="width: 100px;">
+                        <div class="progress-fill teal" style="width: ${(count / Math.max(...sorted.map(s => s[1]))) * 100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('top-regions').innerHTML = html || '<p class="text-muted">No data available</p>';
+        }
+
+        function updateHighRiskZones() {
+            const claims = AgriGuard.getClaims();
+            const zoneRisk = {};
+
+            const highRiskZones = ['Coastal Region', 'Hill Region'];
+            
+            highRiskZones.forEach(zone => {
+                const zoneClaims = claims.filter(c => c.region === zone);
+                const highRisk = zoneClaims.filter(c => c.aiResult && c.aiResult.fraudRisk > 60).length;
+                zoneRisk[zone] = {
+                    total: zoneClaims.length,
+                    highRisk: highRisk,
+                    percentage: zoneClaims.length > 0 ? Math.round((highRisk / zoneClaims.length) * 100) : 0
+                };
+            });
+
+            const html = Object.entries(zoneRisk).map(([zone, data]) => `
+                <div class="flex-between mb-md" style="padding: 12px; background: var(--glass-bg); border-radius: 8px;">
+                    <div>
+                        <div class="font-semibold text-warning">${zone}</div>
+                        <div class="text-sm text-muted">${data.total} total claims</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-danger font-bold">${data.highRisk} high risk</div>
+                        <div class="text-sm text-muted">${data.percentage}% risk rate</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('high-risk-zones').innerHTML = html || '<p class="text-muted">No high-risk zones detected</p>';
+        }
+
+        function loadRecentTransactions() {
+            const transactions = AgriGuard.getTransactions()
+                .filter(t => t.status === 'completed')
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 10);
+
+            const tbody = document.getElementById('transactions-tbody');
+            const noTransactions = document.getElementById('no-transactions');
+
+            if (transactions.length === 0) {
+                tbody.innerHTML = '';
+                noTransactions.classList.remove('hidden');
+                return;
+            }
+
+            noTransactions.classList.add('hidden');
+
+            tbody.innerHTML = transactions.map(txn => `
+                <tr>
+                    <td><code class="text-sm">${txn.id}</code></td>
+                    <td><code class="text-sm">${txn.claimId}</code></td>
+                    <td>${txn.farmerName}</td>
+                    <td>${txn.cropType}</td>
+                    <td class="text-success font-bold">${AgriGuard.formatCurrency(txn.amount)}</td>
+                    <td>${AgriGuard.formatDate(txn.date)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateExtendedStats() {
+            const claims = AgriGuard.getClaims();
+            const transactions = AgriGuard.getTransactions().filter(t => t.status === 'completed');
+
+            const approved = claims.filter(c => c.status === 'approved').length;
+            const review = claims.filter(c => c.status === 'review' || c.status === 'pending').length;
+            const highRisk = claims.filter(c => c.aiResult && c.aiResult.fraudRisk > 60).length;
+
+            const totalPayout = transactions.reduce((sum, t) => sum + t.amount, 0);
+            const avgPayout = transactions.length > 0 ? totalPayout / transactions.length : 0;
+
+            const claimsWithScore = claims.filter(c => c.aiResult);
+            const avgScore = claimsWithScore.length > 0 
+                ? claimsWithScore.reduce((sum, c) => sum + c.aiResult.finalScore, 0) / claimsWithScore.length 
+                : 0;
+
+            const approvalRate = claims.length > 0 ? Math.round((approved / claims.length) * 100) : 0;
+
+            document.getElementById('stat-total-claims').textContent = claims.length;
+            document.getElementById('stat-approved').textContent = approved;
+            document.getElementById('stat-review').textContent = review;
+            document.getElementById('stat-total-payout').textContent = AgriGuard.formatCurrency(totalPayout);
+            document.getElementById('stat-avg-score').textContent = Math.round(avgScore) + '%';
+            document.getElementById('stat-approval-rate').textContent = approvalRate + '%';
+            document.getElementById('stat-fraud-detected').textContent = highRisk;
+            document.getElementById('stat-avg-payout').textContent = AgriGuard.formatCurrency(avgPayout);
+        }
+
+        function drawPayoutCropChart(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const { width, height } = canvas.getBoundingClientRect();
+            
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const displayWidth = width;
+            const displayHeight = height;
+
+            ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+            const transactions = AgriGuard.getTransactions().filter(t => t.status === 'completed');
+            const cropPayout = {};
+
+            Object.keys(FinanceEngine.BASE_RATES).forEach(crop => {
+                cropPayout[crop] = 0;
+            });
+
+            transactions.forEach(txn => {
+                const cropKey = txn.cropType.toLowerCase();
+                if (cropPayout[cropKey] !== undefined) {
+                    cropPayout[cropKey] += txn.amount;
+                }
+            });
+
+            const labels = Object.keys(cropPayout).map(c => AgriGuard.getCropName(c));
+            const values = Object.values(cropPayout);
+            const total = values.reduce((a, b) => a + b, 0);
+
+            if (total === 0) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.font = '14px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('No payout data available', displayWidth / 2, displayHeight / 2);
+                return;
+            }
+
+            const padding = { top: 40, right: 20, bottom: 50, left: 60 };
+            const chartWidth = displayWidth - padding.left - padding.right;
+            const chartHeight = displayHeight - padding.top - padding.bottom;
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('Payout by Crop Type (₹)', displayWidth / 2, 20);
+
+            const maxValue = Math.max(...values) * 1.1;
+            const barWidth = (chartWidth / labels.length) * 0.7;
+            const barGap = (chartWidth / labels.length) * 0.3;
+
+            const colors = ['#1a5f2a', '#38b2ac', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(displayWidth - padding.right, y);
+                ctx.stroke();
+
+                const value = Math.round(maxValue - (maxValue / 5) * i);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.font = '12px Segoe UI';
+                ctx.textAlign = 'right';
+                ctx.fillText('₹' + value.toLocaleString(), padding.left - 10, y + 4);
+            }
+
+            values.forEach((value, i) => {
+                const x = padding.left + (chartWidth / labels.length) * i + barGap / 2;
+                const barHeight = (value / maxValue) * chartHeight;
+                const y = padding.top + chartHeight - barHeight;
+
+                const gradient = ctx.createLinearGradient(0, y, 0, padding.top + chartHeight);
+                gradient.addColorStop(0, colors[i % colors.length]);
+                gradient.addColorStop(1, adjustColor(colors[i % colors.length], -30));
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, barHeight, [4, 4, 0, 0]);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.font = '11px Segoe UI';
+                ctx.textAlign = 'center';
+                const labelText = labels[i].length > 6 ? labels[i].substring(0, 6) + '..' : labels[i];
+                ctx.fillText(labelText, x + barWidth / 2, displayHeight - padding.bottom + 20);
+            });
+        }
+
+        function adjustColor(color, amount) {
+            const hex = color.replace('#', '');
+            const r = Math.max(0, Math.min(255, parseInt(hex.substring(0, 2), 16) + amount));
+            const g = Math.max(0, Math.min(255, parseInt(hex.substring(2, 4), 16) + amount));
+            const b = Math.max(0, Math.min(255, parseInt(hex.substring(4, 6), 16) + amount));
+            return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        }
+
+        setTimeout(() => {
+            drawPayoutCropChart('payout-crop-chart');
+        }, 200);
+
+        function exportReport() {
+            const claims = AgriGuard.getClaims();
+            const transactions = AgriGuard.getTransactions().filter(t => t.status === 'completed');
+
+            const reportData = {
+                summary: {
+                    totalClaims: claims.length,
+                    approved: claims.filter(c => c.status === 'approved').length,
+                    rejected: claims.filter(c => c.status === 'rejected').length,
+                    review: claims.filter(c => c.status === 'review' || c.status === 'pending').length,
+                    totalPayout: transactions.reduce((sum, t) => sum + t.amount, 0),
+                    avgPayout: transactions.length > 0 ? transactions.reduce((sum, t) => sum + t.amount, 0) / transactions.length : 0
+                },
+                claims: claims.map(c => ({
+                    ID: c.id,
+                    Farmer: c.farmerName,
+                    Crop: AgriGuard.getCropName(c.cropType),
+                    LandSize: c.landSize,
+                    Region: c.region,
+                    Status: c.status,
+                    AIScore: c.aiResult?.finalScore || 0,
+                    FraudRisk: c.aiResult?.fraudRisk || 0,
+                    Payout: c.payoutAmount || 0
+                })),
+                transactions: transactions.map(t => ({
+                    TransactionID: t.id,
+                    ClaimID: t.claimId,
+                    Farmer: t.farmerName,
+                    Crop: t.cropType,
+                    Amount: t.amount,
+                    Date: t.date
+                }))
+            };
+
+            AgriGuard.downloadCSV(reportData.claims, `government_report_claims_${new Date().toISOString().split('T')[0]}.csv`);
+            AgriGuard.showNotification('Report exported successfully', 'success');
+        }
+
+        window.addEventListener('resize', function() {
+            Analytics.initCharts();
+            drawPayoutCropChart('payout-crop-chart');
+        });
+    </script>
+</body>
+</html>
